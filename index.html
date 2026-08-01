@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Decoder Box · Cyber Escape Room</title>
+<meta name="description" content="A 6 minute cyber escape room. Seven rooms, seven digits, one stolen gaming account. Built by the La Trobe University Cybersecurity Society.">
+<meta name="theme-color" content="#241a4d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Decoder Box">
+<meta property="og:type" content="website">
+<meta property="og:title" content="THE DECODER BOX 💀">
+<meta property="og:description" content="Jayden got cooked. 7 rooms, 7 digits, 6 minutes. Can you work out how they got in?">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+<style>
+:root{
+  --grape:#241a4d; --grape-2:#33256b; --grape-3:#42308a;
+  --tang:#ff7a2f; --mint:#3ddc97; --bubble:#ff4d8d;
+  --cream:#fff4e6; --ink:#140c2e;
+  --sans:ui-sans-serif,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{height:100%}
+body{margin:0;background:var(--grape);color:var(--cream);font-family:var(--sans);
+  font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  overscroll-behavior-y:contain;-webkit-tap-highlight-color:transparent}
+button,.tap,.sw,.pip{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input{font:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--tang);outline-offset:3px}
+
+.chunk{display:inline-block;background:var(--tang);color:var(--ink);border:3px solid var(--ink);
+  border-radius:14px;box-shadow:0 6px 0 var(--ink);padding:14px 26px;font-weight:900;
+  font-size:17px;text-transform:uppercase;transition:transform .08s,box-shadow .08s}
+.chunk:hover{transform:translateY(2px);box-shadow:0 4px 0 var(--ink)}
+.chunk:active{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
+.chunk.is-ghost{background:var(--grape-2);color:var(--cream);border-color:#0e0824;box-shadow:0 6px 0 #0e0824}
+
+.wrap{max-width:720px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+  padding:0 16px calc(36px + env(safe-area-inset-bottom));
+  padding-left:calc(16px + env(safe-area-inset-left));padding-right:calc(16px + env(safe-area-inset-right))}
+
+.bar{display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--grape);z-index:5;
+  padding:calc(12px + env(safe-area-inset-top)) 0 14px}
+.clock{font-family:var(--mono);font-size:31px;font-weight:700;letter-spacing:-.03em;
+  background:var(--ink);color:var(--mint);border:3px solid #000;border-radius:12px;padding:1px 12px}
+.clock.is-warn{color:var(--tang)}
+.clock.is-dead{color:var(--bubble);animation:buzz .5s infinite}
+@keyframes buzz{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.aura{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--tang)}
+.aura .lb{display:block;font-family:var(--sans);font-size:9px;font-weight:900;letter-spacing:.16em;color:var(--cream);opacity:.5}
+.pips{margin-left:auto;display:flex;gap:5px}
+.pip{width:11px;height:11px;border-radius:50%;border:2px solid var(--ink);background:var(--grape-2)}
+.pip.is-done{background:var(--mint)}
+.float{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:30;font-family:var(--mono);
+  font-size:clamp(19px,5.6vw,30px);font-weight:700;pointer-events:none;opacity:0;text-align:center;
+  white-space:nowrap;max-width:94vw;text-shadow:0 2px 0 var(--ink)}
+.float.is-up{animation:fl 1.1s ease-out}
+@keyframes fl{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-42px)}}
+
+.screen{display:none;flex:1}
+.screen.is-live{display:block;animation:pop .26s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.kicker{font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--tang);margin:0 0 8px}
+.kicker.is-bonus{color:var(--bubble)}
+h1{font-size:clamp(38px,10vw,64px);font-weight:900;letter-spacing:-.04em;line-height:.92;margin:0 0 14px}
+h2{font-size:clamp(24px,5.6vw,34px);font-weight:900;letter-spacing:-.03em;line-height:1.02;margin:0 0 12px}
+p{margin:0 0 11px;max-width:56ch;font-size:17px}
+.dim{opacity:.7;font-size:15px}
+.tang{color:var(--tang)}.mint{color:var(--mint)}.pink{color:var(--bubble)}
+
+.pwgrid{display:grid;gap:10px}
+.pw{display:flex;align-items:center;gap:12px;text-align:left;background:var(--grape-3);
+  border:3px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);padding:13px 15px;
+  font-family:var(--mono);font-size:clamp(15px,4vw,21px);font-weight:700;word-break:break-all;
+  transition:transform .08s,box-shadow .08s}
+.pw:hover{transform:translateY(2px);box-shadow:0 3px 0 var(--ink)}
+.pw .tick{flex:none;margin-left:auto;font-family:var(--sans);font-size:11px;font-weight:900;opacity:0}
+.pw.is-right{background:var(--mint);color:var(--ink)}
+.pw.is-wrong{background:#6e2140;opacity:.5}
+.pw.is-right .tick,.pw.is-wrong .tick{opacity:1}
+.pw[disabled]{pointer-events:none}
+
+.dm{background:var(--ink);border:3px solid #000;border-radius:16px;padding:14px;margin:0 0 12px;font-size:16px;line-height:2.15}
+.dm-head{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:2px solid #2a1d55;margin-bottom:10px}
+.pfp{width:36px;height:36px;border-radius:50%;background:var(--bubble);border:3px solid var(--cream);flex:none}
+.pfp.is-mate{background:var(--mint)}
+.tap{cursor:pointer;border-radius:7px;padding:8px 7px;transition:background .12s;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.tap:hover{background:#3a2a70}
+.tap.is-hit{background:var(--mint);color:var(--ink);font-weight:700}
+.tap.is-hit::after{content:" ✓"}
+.tap.is-miss{background:#6e2140;animation:no .35s}
+@keyframes no{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.feed{background:var(--ink);border:3px solid #000;border-radius:16px;padding:14px;margin:0 0 12px}
+.handle{font-weight:900;font-size:18px;margin-bottom:10px}
+.post{display:flex;gap:11px;padding:9px 0;border-bottom:2px solid #241a4d;font-size:15.5px}
+.post:last-child{border-bottom:none}
+.post .e{font-size:22px;flex:none}
+.reset{background:var(--grape-2);border:3px solid var(--ink);border-radius:16px;box-shadow:0 6px 0 var(--ink);padding:15px;margin:0 0 12px}
+.reset .lb{font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;opacity:.6;margin-bottom:4px}
+.reset .q{font-size:19px;font-weight:900;margin-bottom:11px}
+.txt{width:100%;font-family:var(--mono);font-size:22px;font-weight:700;text-align:center;text-transform:uppercase;
+  letter-spacing:.1em;background:var(--ink);color:var(--mint);border:3px solid #000;border-radius:12px;padding:12px}
+.txt::placeholder{color:#4a3a7a}
+
+.app{background:var(--ink);border:3px solid #000;border-radius:16px;padding:14px;margin:0 0 12px}
+.app-head{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:2px solid #2a1d55;margin-bottom:6px}
+.icon{width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,var(--bubble),var(--tang));
+  border:3px solid var(--cream);flex:none;display:grid;place-items:center;font-size:24px}
+.app-name{font-weight:900;font-size:19px;line-height:1.1}
+.app-sub{font-size:12.5px;opacity:.55}
+.perm{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:2px solid #241a4d}
+.perm:last-child{border-bottom:none}
+.perm .e{font-size:20px;flex:none}
+.perm .t{flex:1;font-size:15px;font-weight:700;min-width:0}
+.perm .t small{display:block;font-weight:400;font-size:12.5px;opacity:.5}
+.sw{width:66px;height:40px;border-radius:20px;background:#3a2a70;border:3px solid #000;flex:none;
+  position:relative;transition:background .16s}
+.sw.is-on{background:var(--mint)}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;
+  background:var(--cream);transition:transform .16s}
+.sw.is-on::after{transform:translateX(26px)}
+.perm.is-good .t{color:var(--mint)}
+.perm.is-bad .t{color:var(--bubble)}
+
+.notif{background:#e8e4dd;color:#1a1a1a;border:3px solid var(--ink);border-radius:14px;padding:13px 15px;margin:0 0 14px}
+.notif .from{font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:3px}
+.notif .body{font-size:16px}
+.notif b{font-family:var(--mono);font-size:24px;letter-spacing:.08em}
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media(max-width:460px){.twin{grid-template-columns:1fr}}
+.big-btn{border:3px solid var(--ink);border-radius:16px;box-shadow:0 6px 0 var(--ink);padding:20px 10px;
+  font-weight:900;font-size:19px;text-transform:uppercase;transition:transform .08s,box-shadow .08s}
+.big-btn:hover{transform:translateY(2px);box-shadow:0 4px 0 var(--ink)}
+.big-btn.yes{background:var(--mint);color:var(--ink)}
+.big-btn.no{background:var(--bubble);color:#fff}
+
+.exhibit{font-family:var(--mono);font-size:clamp(26px,8vw,46px);font-weight:700;background:var(--ink);
+  border:3px solid #000;border-radius:14px;padding:18px 10px;text-align:center;letter-spacing:.16em;margin:0 0 12px}
+.exhibit.is-solved{background:var(--mint);color:var(--ink)}
+.knob{display:flex;align-items:center;justify-content:center;gap:14px;margin:0 0 14px}
+.knob button{background:var(--grape-3);border:3px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);
+  width:66px;height:56px;font-size:26px;font-weight:900;transition:transform .07s,box-shadow .07s}
+.knob button:hover{transform:translateY(2px);box-shadow:0 3px 0 var(--ink)}
+.knob .val{font-family:var(--mono);font-size:26px;font-weight:700;min-width:90px;text-align:center;color:var(--tang)}
+.knob .val small{display:block;font-family:var(--sans);font-size:9px;font-weight:900;letter-spacing:.16em;color:var(--cream);opacity:.5}
+
+.steps{display:grid;gap:10px}
+.step{display:flex;align-items:center;gap:13px;text-align:left;background:var(--grape-3);
+  border:3px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);padding:14px 15px;
+  font-weight:700;font-size:16.5px;transition:transform .08s,box-shadow .08s}
+.step:hover{transform:translateY(2px);box-shadow:0 3px 0 var(--ink)}
+.step .e{font-size:23px;flex:none}
+.step .badge{margin-left:auto;flex:none;width:32px;height:32px;border-radius:50%;background:var(--ink);
+  border:3px solid #000;display:grid;place-items:center;font-family:var(--mono);font-size:16px;color:#4a3a7a}
+.step.is-set{background:var(--mint);color:var(--ink);pointer-events:none}
+.step.is-set .badge{background:var(--ink);color:var(--mint)}
+.step.is-no{animation:no .35s;background:#6e2140}
+
+.react{border:3px solid var(--ink);border-radius:16px;padding:15px;margin:12px 0 0;background:var(--mint);color:var(--ink);display:none}
+.react.is-live{display:block;animation:pop .28s ease-out}
+.react.is-bad{background:var(--bubble);color:#fff}
+.react h3{margin:0 0 8px;font-size:24px;font-weight:900;letter-spacing:-.02em}
+.react ul{margin:0 0 10px;padding-left:19px}
+.react li{margin:0 0 4px;font-size:15.5px}
+.react p{font-size:16px;margin:0 0 8px}
+.react .chunk{margin-top:10px;background:var(--ink);color:var(--cream);box-shadow:0 6px 0 #000;border-color:#000}
+.prize{display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:var(--tang);
+  border-radius:12px;padding:6px 14px;font-weight:900;font-size:15px;margin:0 0 10px}
+.prize b{font-family:var(--mono);font-size:28px;line-height:1}
+
+.lock{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px;background:var(--grape-2);
+  border:3px solid var(--ink);border-radius:20px;box-shadow:0 8px 0 var(--ink);margin:20px 0 0;
+  --dw:min(52px, calc((100vw - 118px)/7));--dh:calc(var(--dw) * 1.35)}
+.dial{width:var(--dw);height:var(--dh);background:var(--ink);border:3px solid #000;
+  border-radius:calc(var(--dw)*.21);overflow:hidden;position:relative;flex:none}
+.reel{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .85s cubic-bezier(.2,1.5,.4,1)}
+.reel span{height:var(--dh);flex:none;display:grid;place-items:center;font-family:var(--mono);
+  font-size:calc(var(--dw)*.66);font-weight:700;color:#4a3a7a}
+.dial.is-set .reel span{color:var(--mint)}
+
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:320px;margin:16px auto 0}
+.key{background:var(--grape-3);border:3px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);
+  padding:15px 0;font-family:var(--mono);font-size:26px;font-weight:700;transition:transform .07s,box-shadow .07s}
+.key:hover{transform:translateY(2px);box-shadow:0 3px 0 var(--ink)}
+.key.is-fn{font-family:var(--sans);font-size:13px;font-weight:900;background:var(--grape-2)}
+.entry{font-family:var(--mono);font-size:clamp(26px,8vw,46px);font-weight:700;text-align:center;
+  letter-spacing:.1em;color:var(--tang);margin:2px 0 0;word-break:break-all}
+.entry.is-no{color:var(--bubble);animation:no .4s}
+
+.hero{text-align:center;padding:22px 12px;background:var(--mint);color:var(--ink);border:3px solid var(--ink);
+  border-radius:22px;box-shadow:0 8px 0 var(--ink);margin:0 0 18px}
+.hero .num{font-family:var(--mono);font-size:clamp(34px,10vw,64px);font-weight:700;line-height:1;letter-spacing:.04em}
+.hero .cap{font-weight:900;font-size:15px;letter-spacing:.14em;text-transform:uppercase;margin-top:8px}
+.rank{display:flex;align-items:center;gap:14px;background:var(--grape-2);border:3px solid var(--ink);
+  border-radius:18px;box-shadow:0 6px 0 var(--ink);padding:15px;margin:0 0 18px}
+.rank .n{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--tang);line-height:1}
+.rank .t{font-size:20px;font-weight:900;letter-spacing:-.02em}
+.rank .s{font-size:13px;opacity:.65}
+.decode{background:var(--grape-2);border:3px solid var(--ink);border-radius:18px;box-shadow:0 6px 0 var(--ink);
+  padding:14px;margin:0 0 18px}
+.dline{display:flex;gap:12px;align-items:baseline;padding:8px 0;border-bottom:2px solid var(--grape-3)}
+.dline:last-child{border-bottom:none}
+.dline b{font-family:var(--mono);font-size:26px;color:var(--tang);flex:none;width:24px;line-height:1}
+.dline span{font-size:15.5px}
+.hit{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:2px solid var(--grape-3)}
+.hit:last-child{border-bottom:none}
+.hit .e{font-size:26px;flex:none;line-height:1.1}
+.hit p{margin:0;font-size:16px}
+.hit b{color:var(--mint)}
+.cta{background:var(--tang);color:var(--ink);border:3px solid var(--ink);border-radius:18px;
+  box-shadow:0 6px 0 var(--ink);padding:16px;margin:18px 0}
+.cta h2{color:var(--ink);margin-bottom:6px}
+.cta p{color:var(--ink);margin:0}
+.foot{margin-top:18px;font-size:13px;opacity:.6}
+
+@media(max-width:400px){
+  .wrap{padding-left:calc(12px + env(safe-area-inset-left));padding-right:calc(12px + env(safe-area-inset-right))}
+  .bar{gap:8px}
+  .clock{font-size:26px;padding:1px 8px}
+  .aura{font-size:16px}
+  .pips{gap:4px}.pip{width:9px;height:9px}
+  .chunk{padding:15px 20px;font-size:16px;width:100%;text-align:center}
+  .knob button{width:74px;height:60px}
+  .dm{font-size:15.5px;line-height:2.35}
+  .perm .t{font-size:14.5px}
+  .perm .t small{font-size:12px}
+  .sw{width:60px;height:38px}
+  .sw::after{width:26px;height:26px}
+  .sw.is-on::after{transform:translateX(24px)}
+  .step{font-size:15.5px;padding:15px 13px}
+  .lock{padding:9px;gap:5px;margin-top:16px;--dw:min(52px, calc((100vw - 82px)/7))}
+  .react h3{font-size:21px}
+  .react p,.react li{font-size:15px}
+  p{font-size:16.5px}
+}
+@media(hover:none){
+  .chunk:hover,.pw:hover,.key:hover,.step:hover,.knob button:hover,.big-btn:hover{transform:none}
+  .tap:hover{background:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="float" id="float"></div>
+<div class="wrap">
+
+  <div class="bar">
+    <div class="clock" id="clock">6:00</div>
+    <div class="aura"><span class="lb">Aura</span><span id="aura">0</span></div>
+    <div class="pips" id="pips"></div>
+  </div>
+
+  <!-- INTRO -->
+  <section class="screen is-live" id="s-intro">
+    <p class="kicker">Case file 0447</p>
+    <h1>JAYDEN GOT<br><span class="pink">COOKED.</span> 💀</h1>
+    <p>He's 13. Last night someone took his <b class="tang">RIZZ ROYALE</b> account, sold his rare skin and drained 6,700 coins.</p>
+    <p>His mum reckons he told a mate the password. He didn't.</p>
+    <p class="dim"><b class="tang">7 rooms. Each one gives you a digit.</b> Crack all seven and the box opens. Wrong answers cost aura.</p>
+    <button class="chunk" id="go">Let him cook →</button>
+  </section>
+
+  <!-- 1 · PASSWORD -->
+  <section class="screen" id="s-1">
+    <p class="kicker">Room 1 · the password</p>
+    <h2>Which one lasts the <span class="mint">longest?</span></h2>
+    <p class="dim">One of these is Jayden's. Pick the one a hacker takes longest to crack.</p>
+    <div class="pwgrid" id="c1">
+      <button class="pw" data-i="0"><span>Sigma6767</span><span class="tick">2 SEC</span></button>
+      <button class="pw" data-i="1"><span>Xx_G0ku_xX!</span><span class="tick">9 MIN</span></button>
+      <button class="pw" data-i="2"><span>P@$$w0rd!23</span><span class="tick">4 SEC</span></button>
+      <button class="pw" data-i="3"><span>skibidiohiofanumtax</span><span class="tick">4 TRILLION YRS</span></button>
+    </div>
+    <div class="react" id="r1"></div>
+  </section>
+
+  <!-- 2 · PROFILE -->
+  <section class="screen" id="s-2">
+    <p class="kicker">Room 2 · his profile</p>
+    <h2>Now <span class="pink">you</span> break in.</h2>
+    <p class="dim">This is Jayden's public profile. Use it to answer his security question.</p>
+    <div class="feed">
+      <div class="handle">@jayden_ftw 🐐</div>
+      <div class="post"><span class="e">🎂</span><div>happy 5th bday to my goat <b>BISCUIT</b> best dog ever 🐶</div></div>
+      <div class="post"><span class="e">🏫</span><div>last day at northcote high fr 🙌</div></div>
+      <div class="post"><span class="e">🎉</span><div>march 14 bday plans?? drop ideas</div></div>
+      <div class="post"><span class="e">🎮</span><div>1v1 me on rizz royale @ jayden_ftw</div></div>
+    </div>
+    <div class="reset">
+      <div class="lb">Forgot password</div>
+      <div class="q">What was your first pet's name?</div>
+      <input class="txt" id="pet" placeholder="ANSWER" maxlength="14" autocomplete="off" spellcheck="false" aria-label="Security answer">
+    </div>
+    <button class="chunk" id="petgo">Reset his password</button>
+    <div class="react" id="r2"></div>
+  </section>
+
+  <!-- 3 · PERMISSIONS -->
+  <section class="screen" id="s-3">
+    <p class="kicker">Room 3 · the free app</p>
+    <h2>It rates your rizz. It's free.</h2>
+    <p class="dim">Everything is on by default. Switch off anything it doesn't actually need, then install.</p>
+    <div class="app">
+      <div class="app-head">
+        <div class="icon">😮‍💨</div>
+        <div><div class="app-name">Rizz Meter 3000</div><div class="app-sub">FREE · 4.8★ · 2M downloads</div></div>
+      </div>
+      <div id="perms">
+        <div class="perm" data-need="1"><span class="e">📷</span>
+          <span class="t">Camera<small>scan your face, get your rizz score</small></span>
+          <button class="sw is-on" aria-label="Camera"></button></div>
+        <div class="perm" data-need="0"><span class="e">👥</span>
+          <span class="t">Contacts<small>see everyone in your phone</small></span>
+          <button class="sw is-on" aria-label="Contacts"></button></div>
+        <div class="perm" data-need="0"><span class="e">🎤</span>
+          <span class="t">Microphone<small>listen, even in the background</small></span>
+          <button class="sw is-on" aria-label="Microphone"></button></div>
+        <div class="perm" data-need="0"><span class="e">📍</span>
+          <span class="t">Location, always<small>track you when the app is closed</small></span>
+          <button class="sw is-on" aria-label="Location"></button></div>
+        <div class="perm" data-need="0"><span class="e">💬</span>
+          <span class="t">Text messages<small>read every message you get</small></span>
+          <button class="sw is-on" aria-label="Messages"></button></div>
+        <div class="perm" data-need="0"><span class="e">🖼️</span>
+          <span class="t">Photos, all of them<small>every picture on your phone</small></span>
+          <button class="sw is-on" aria-label="Photos"></button></div>
+        <div class="perm" data-need="0"><span class="e">📁</span>
+          <span class="t">Files and downloads<small>anything you've ever saved</small></span>
+          <button class="sw is-on" aria-label="Files"></button></div>
+      </div>
+    </div>
+    <button class="chunk" id="install">Install it</button>
+    <div class="react" id="r3"></div>
+  </section>
+
+  <!-- 4 · DM -->
+  <section class="screen" id="s-4">
+    <p class="kicker">Room 4 · the DM</p>
+    <h2>He clicked this at 11pm.</h2>
+    <p class="dim">Tap the <b class="tang">6 red flags</b>. Nothing is highlighted. Guessing costs you.</p>
+    <div class="dm">
+      <div class="dm-head"><span class="pfp"></span><div>
+        <div style="font-weight:900"><span class="tap" data-f="1">R0BLOX_M0D_0FFICIAL</span> <span class="mint" style="font-size:13px">✔ verified</span></div>
+        <div style="font-size:12px;opacity:.5"><span class="tap" data-f="0">now</span></div>
+      </div></div>
+      <div>
+        <span class="tap" data-f="0">yo</span> 🔥 <span class="tap" data-f="1">CONGRATS bro you got 10,000 FREE COINS cos ur one of our top players</span> 💀<br><br>
+        <span class="tap" data-f="0">claim here</span> 👉 <span class="tap" data-f="1">rizz-royale-freecoins.tk</span><br><br>
+        <span class="tap" data-f="1">just log in w ur username and password</span> on the page<br><br>
+        <span class="tap" data-f="1">expires in 5 MINUTES</span> ⏰ <span class="tap" data-f="1">dont tell anyone ur in the secret beta</span> 🤫
+      </div>
+    </div>
+    <p class="dim">Found <b class="tang" id="fc">0</b> of 6 · misses <b class="pink" id="mc">0</b></p>
+    <div class="react" id="r4"></div>
+  </section>
+
+  <!-- 5 · THE CODE -->
+  <section class="screen" id="s-5">
+    <p class="kicker">Room 5 · the code</p>
+    <h2>Your mate needs a favour.</h2>
+    <div class="dm">
+      <div class="dm-head"><span class="pfp is-mate"></span><div>
+        <div style="font-weight:900">tyler_23 <span class="dim" style="font-size:12px">· your actual mate</span></div>
+        <div style="font-size:12px;opacity:.5">now</div>
+      </div></div>
+      <div>bro this is so embarrassing 😭 i was making a new acc and typed ur number by accident. can u send me the code that just came thru?? need it b4 it expires 🙏</div>
+    </div>
+    <div class="notif">
+      <div class="from">Message · just now</div>
+      <div class="body"><b>881204</b> is your verification code. Do not share this code with anyone.</div>
+    </div>
+    <div class="twin" id="c5">
+      <button class="big-btn yes" data-y="1">Send it 🙏</button>
+      <button class="big-btn no" data-y="0">Nah ✋</button>
+    </div>
+    <div class="react" id="r5"></div>
+  </section>
+
+  <!-- 6 · CIPHER -->
+  <section class="screen" id="s-6">
+    <p class="kicker">Room 6 · the tag</p>
+    <h2>They left their name.</h2>
+    <p class="dim">Every letter got pushed along the alphabet. Crank the dial until it spells something, then lock it in.</p>
+    <p class="dim">🔎 <b class="tang">What you're looking for:</b> one word, 7 letters. It's not in the dictionary. It's brainrot.</p>
+    <div class="exhibit" id="cipher">VNLELGL</div>
+    <div class="knob">
+      <button id="down">◀</button>
+      <div class="val"><small>Shift</small><span id="shiftv">0</span></div>
+      <button id="up">▶</button>
+    </div>
+    <button class="chunk" id="lockin">Lock it in</button>
+    <button class="chunk is-ghost" id="hintbtn">Hint (-200 aura)</button>
+    <div class="react" id="r6"></div>
+  </section>
+
+  <!-- 7 · WHAT NOW -->
+  <section class="screen" id="s-7">
+    <p class="kicker">Room 7 · final room</p>
+    <h2>It's happening to <span class="pink">you.</span></h2>
+    <p class="dim">Someone is in your account right now. Tap these in the right order. Think: get help, kick them out, lock the door, warn the street.</p>
+    <div class="steps" id="steps">
+      <button class="step" data-o="2"><span class="e">🔑</span><span>Change the password</span><span class="badge">?</span></button>
+      <button class="step" data-o="4"><span class="e">📢</span><span>Warn your mates</span><span class="badge">?</span></button>
+      <button class="step" data-o="1"><span class="e">🗣️</span><span>Tell an adult you trust</span><span class="badge">?</span></button>
+      <button class="step" data-o="3"><span class="e">🔒</span><span>Turn on 2FA</span><span class="badge">?</span></button>
+    </div>
+    <div class="react" id="r7"></div>
+  </section>
+
+  <!-- KEYPAD -->
+  <section class="screen" id="s-pad">
+    <p class="kicker">7 digits secured</p>
+    <h2>Punch it in.</h2>
+    <p class="dim">The dials at the bottom have your code. Type it and open the box.</p>
+    <div class="entry" id="entry">_______</div>
+    <div class="pad">
+      <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
+      <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+      <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
+      <button class="key is-fn" data-k="del">⌫</button><button class="key" data-k="0">0</button><button class="key is-fn" data-k="ok">Open</button>
+    </div>
+  </section>
+
+  <!-- OPEN -->
+  <section class="screen" id="s-open">
+    <div class="hero"><div class="num">2 4 7 6 0 7 1</div><div class="cap">Box open</div></div>
+    <h2>Not a random number.</h2>
+    <p>The first three are <b class="tang">24/7</b>. Hackers never clock off. There are bots guessing passwords right now, while you read this, and they do not care that you're 13.</p>
+    <p class="dim">The rest is Jayden's case file, one digit per mistake.</p>
+    <div class="decode">
+      <div class="dline"><b>2</b><span>seconds to crack his password</span></div>
+      <div class="dline"><b>4</b><span>facts he handed over in public posts</span></div>
+      <div class="dline"><b>7</b><span>things a flashlight-tier app asked for. It needed one</span></div>
+      <div class="dline"><b>6</b><span>red flags in one DM he scrolled straight past</span></div>
+      <div class="dline"><b>0</b><span>people you ever send a verification code to</span></div>
+      <div class="dline"><b>7</b><span>letters in the tag they left behind</span></div>
+      <div class="dline"><b>1</b><span>thing he didn't do. Tell someone.</span></div>
+    </div>
+    <div class="rank"><div class="n" id="finalAura">0</div><div><div class="t" id="rankT">—</div><div class="s" id="rankS"></div></div></div>
+    <h2>The short version</h2>
+    <div class="hit"><span class="e">🔑</span><p><b>Length beats symbols.</b> Four random words wins every time.</p></div>
+    <div class="hit"><span class="e">🐶</span><p><b>Lie on security questions.</b> Your first pet can be Lasagne.</p></div>
+    <div class="hit"><span class="e">📷</span><p><b>If an app doesn't need it to work, switch it off.</b> Free apps sell you.</p></div>
+    <div class="hit"><span class="e">🎣</span><p><b>Nobody real ever DMs you for your password.</b> Nobody.</p></div>
+    <div class="hit"><span class="e">🔢</span><p><b>Never send a code.</b> Not even to your mate, because it might not be your mate.</p></div>
+    <div class="hit"><span class="e">🗣️</span><p><b>If it happens, tell someone.</b> You are not in trouble. Staying quiet is what they're counting on.</p></div>
+    <div class="cta"><h2>People get paid to do this</h2><p>Breaking into stuff on purpose is a real job with real money. It's called penetration testing and you just did the thinking part.</p></div>
+    <p class="foot">La Trobe University Cybersecurity Society<br>&amp; WiCyS La Trobe University</p>
+    <button class="chunk is-ghost" id="again">Run it back</button>
+  </section>
+
+  <div class="lock" id="lock"></div>
+</div>
+
+<script>
+/* ===== change this one number for a longer or shorter run ===== */
+const START_SECONDS = 360;   // 360 = 6 min · 420 = 7 min · 600 = 10 min
+
+const CODE=[2,4,7,6,0,7,1];              // one digit per room
+const $=id=>document.getElementById(id);
+let secs=START_SECONDS,tick=null,aura=0,entry="";
+const dialSet=CODE.map(()=>false);
+
+/* build the lock and the progress pips from CODE so they always match */
+$("lock").innerHTML=CODE.map((_,i)=>
+  `<div class="dial" id="d${i}"><div class="reel">${
+    [0,1,2,3,4,5,6,7,8,9].map(n=>`<span>${n}</span>`).join("")}</div></div>`).join("");
+$("pips").innerHTML=CODE.map((_,i)=>`<span class="pip" id="pip${i}"></span>`).join("");
+
+function paint(){const m=Math.floor(Math.abs(secs)/60),s=Math.abs(secs)%60,c=$("clock");
+  c.textContent=(secs<0?"+":"")+m+":"+String(s).padStart(2,"0");
+  c.className="clock"+(secs<0?" is-dead":secs<=60?" is-warn":"");}
+function runClock(){if(!tick)tick=setInterval(()=>{secs--;paint();},1000);}
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("is-live"));
+  $(id).classList.add("is-live");window.scrollTo({top:0,behavior:"smooth"});}
+function bump(n,txt){aura=Math.max(0,aura+n);$("aura").textContent=aura.toLocaleString();
+  const f=$("float");f.textContent=txt||(n>0?"+"+n:n);f.style.color=n>0?"#3ddc97":"#ff4d8d";
+  f.classList.remove("is-up");void f.offsetWidth;f.classList.add("is-up");}
+
+function spin(i){const d=$("d"+i),h=d.querySelector(".reel span").getBoundingClientRect().height||70;
+  d.querySelector(".reel").style.transform=`translateY(-${CODE[i]*h}px)`;}
+function setDial(i){dialSet[i]=true;$("d"+i).classList.add("is-set");spin(i);$("pip"+i).classList.add("is-done");}
+addEventListener("resize",()=>dialSet.forEach((s,i)=>{if(s)spin(i);}));
+addEventListener("orientationchange",()=>setTimeout(()=>dialSet.forEach((s,i)=>{if(s)spin(i);}),250));
+
+function go(nextId,dialIdx){
+  if(dialIdx!=null&&!dialSet[dialIdx])setDial(dialIdx);
+  setTimeout(()=>show(nextId),dialIdx!=null?900:450);}
+function digitTag(n){return `<div class='prize'>Digit ${n+1} &nbsp;<b>${CODE[n]}</b></div>`;}
+
+/* 1 · PASSWORD → 2 */
+$("c1").addEventListener("click",e=>{
+  const b=e.target.closest(".pw");if(!b)return;
+  const right=b.dataset.i==="3";
+  bump(right?1000:-300,right?"+1000 aura":"-300 aura");
+  document.querySelectorAll("#c1 .pw").forEach(p=>{p.disabled=true;
+    p.classList.add(p.dataset.i==="3"?"is-right":"is-wrong");});
+  const r=$("r1");r.className="react is-live"+(right?"":" is-bad");
+  r.innerHTML=(right?"<h3>W. The dumb one wins. 🏆</h3>":"<h3>Nah. The dumb one wins. 🏆</h3>")+digitTag(0)+
+    "<p><b>skibidiohiofanumtax</b> has zero symbols and still beats every one of them, because it's 19 characters long.</p>"+
+    "<p><b>Sigma6767 died in 2 seconds.</b> There's your digit.</p>"+
+    "<button class='chunk' id='n1'>Room 2 →</button>";
+  $("n1").addEventListener("click",()=>go("s-2",0));
+});
+
+/* 2 · PROFILE → 4 */
+let petTries=0;
+function tryPet(){
+  const v=$("pet").value.trim().toUpperCase().replace(/[^A-Z]/g,""),r=$("r2");
+  if(v==="BISCUIT"){
+    bump(petTries===0?800:400,petTries===0?"+800 aura":"+400 aura");
+    r.className="react is-live";
+    r.innerHTML="<h3>You're in. That took 20 seconds. 😬</h3>"+digitTag(1)+
+      "<p>You just reset a stranger's password using <b>his own posts</b>. No hacking. You read.</p>"+
+      "<p>Count what he handed over: <b>his dog, his school, his birthday, his gamertag.</b> Four facts, four posts, and they're the answers to nearly every security question ever written.</p>"+
+      "<p><b>So lie.</b> Your first pet's name can be Lasagne. Just remember which lie you used.</p>"+
+      "<button class='chunk' id='n2'>Room 3 →</button>";
+    $("n2").addEventListener("click",()=>go("s-3",1));
+  }else{
+    petTries++;bump(-150,"-150 aura");
+    r.className="react is-live is-bad";
+    r.innerHTML="<h3>Not it. Read the posts. 👀</h3><p>He literally posted about it. Scroll up.</p>";
+  }
+}
+$("petgo").addEventListener("click",tryPet);
+$("pet").addEventListener("keydown",e=>{if(e.key==="Enter")tryPet();});
+
+/* 3 · PERMISSIONS → 7 */
+document.querySelectorAll("#perms .sw").forEach(sw=>sw.addEventListener("click",()=>sw.classList.toggle("is-on")));
+$("install").addEventListener("click",()=>{
+  let correct=0;
+  document.querySelectorAll("#perms .perm").forEach(p=>{
+    const on=p.querySelector(".sw").classList.contains("is-on"),need=p.dataset.need==="1",ok=(on===need);
+    if(ok)correct++;
+    p.classList.add(ok?"is-good":"is-bad");
+    p.querySelector(".sw").style.pointerEvents="none";
+  });
+  bump(correct*130,"+"+(correct*130)+" aura");
+  const r=$("r3");r.className="react is-live"+(correct===7?"":" is-bad");
+  r.innerHTML="<h3>"+(correct===7?"7 out of 7. Sharp. 🧠":correct+" out of 7. 😵‍💫")+"</h3>"+digitTag(2)+
+    "<p><b>It asked for 7 things. It needed 1.</b> Camera, because it can't scan your face without it. The other six had nothing to do with rizz.</p>"+
+    "<p>Every switch was <b>on by default</b>, because they're hoping you tap through without reading.</p>"+
+    "<p>Free apps aren't free. You're the product. That contacts list gets sold, which is exactly how the next guy found Jayden.</p>"+
+    "<button class='chunk' id='n3'>Room 4 →</button>";
+  $("n3").addEventListener("click",()=>go("s-4",2));
+});
+
+/* 4 · DM → 6 */
+let found=0,miss=0;
+document.querySelectorAll(".tap").forEach(el=>{
+  el.addEventListener("click",()=>{
+    if(el.classList.contains("is-hit")||el.classList.contains("is-miss"))return;
+    if(el.dataset.f==="1"){
+      el.classList.add("is-hit");found++;$("fc").textContent=found;bump(300,"+300 aura");
+      if(found===6){
+        const r=$("r4");r.className="react is-live";
+        r.innerHTML="<h3>All 6. Certified sleuth. 🕵️</h3>"+digitTag(3)+
+          "<ul><li><b>R0BL0X</b> uses zeros, the real name was taken. That ✔ is just an emoji they typed</li>"+
+          "<li><b>10,000 free coins</b> for nothing ← the bait. Nobody hands you stuff for free</li>"+
+          "<li><b>.tk</b> is a free domain anyone can grab</li>"+
+          "<li><b>asks for your password</b> ← the only one that matters</li>"+
+          "<li><b>5 minutes</b> is panic, so you don't stop and think</li>"+
+          "<li><b>dont tell anyone</b> ← the secret. Scams need you quiet</li></ul>"+
+          "<p>Real companies never ask for your password. Not mods, not support, not your fave streamer.</p>"+
+          "<p>And anyone telling you to keep a secret from your parents <b>is the danger</b>, not the free stuff.</p>"+
+          "<button class='chunk' id='n4'>Room 5 →</button>";
+        $("n4").addEventListener("click",()=>go("s-5",3));
+      }
+    }else{
+      el.classList.add("is-miss");miss++;$("mc").textContent=miss;bump(-300,"-300 aura");
+      setTimeout(()=>el.classList.remove("is-miss"),700);
+    }
+  });
+});
+
+/* 5 · THE CODE → 0 */
+$("c5").addEventListener("click",e=>{
+  const b=e.target.closest(".big-btn");if(!b)return;
+  const safe=b.dataset.y==="0";
+  document.querySelectorAll("#c5 .big-btn").forEach(x=>x.disabled=true);
+  bump(safe?800:-600,safe?"+800 aura":"-600 aura");
+  const r=$("r5");r.className="react is-live"+(safe?"":" is-bad");
+  r.innerHTML=(safe?"<h3>Correct. Leave him on read. ✋</h3>":"<h3>And your account is gone. 💀</h3>")+digitTag(4)+
+    "<p><b>Zero.</b> That's how many people you ever send a code to. There is no exception, and that's your digit.</p>"+
+    "<p>That code was the <b>last lock</b> on your account. Someone already had your password and just needed you to hand over the key.</p>"+
+    "<p>It wasn't even Tyler. <b>His account got stolen last week</b> and they're working through his friends list.</p>"+
+    "<button class='chunk' id='n5'>Room 6 →</button>";
+  $("n5").addEventListener("click",()=>go("s-6",4));
+});
+
+/* 6 · CIPHER → 7 */
+const RAW="VNLELGL";let shift=0,tries=0,hintN=0;
+const HINTS=["First letter is <b>S</b>. So push the dial back 3.",
+             "It lives in a toilet. 🚽",
+             "Shift <b>-3</b>. Tap ◀ three times from zero."];
+function shifted(n){return RAW.split("").map(c=>String.fromCharCode(((c.charCodeAt(0)-65+n)%26+26)%26+65)).join("");}
+function redraw(){$("cipher").textContent=shifted(shift);$("shiftv").textContent=(shift>0?"+":"")+shift;}
+$("up").addEventListener("click",()=>{shift=(shift+1)%26;redraw();});
+$("down").addEventListener("click",()=>{shift=(shift-1+26)%26;redraw();});
+$("hintbtn").addEventListener("click",()=>{
+  if(hintN>=HINTS.length)return;
+  bump(-200,"-200 aura");
+  const r=$("r6");r.className="react is-live is-bad";
+  r.innerHTML="<h3>Hint "+(hintN+1)+" 👀</h3><p>"+HINTS[hintN]+"</p>";
+  hintN++;if(hintN>=HINTS.length)$("hintbtn").textContent="No hints left";
+});
+$("lockin").addEventListener("click",()=>{
+  const r=$("r6");
+  if(shifted(shift)==="SKIBIDI"){
+    $("cipher").classList.add("is-solved");
+    bump(tries===0?1000:500,tries===0?"+1000 aura":"+500 aura");
+    r.className="react is-live";
+    r.innerHTML="<h3>SKIBIDI. Obviously. 😭</h3>"+digitTag(5)+
+      "<p><b>S-K-I-B-I-D-I. Seven letters.</b> That's your digit.</p>"+
+      "<p>Julius Caesar used this exact trick 2,000 years ago. Took people <b>800 years</b> to break it. You took 30 seconds.</p>"+
+      "<button class='chunk' id='n6'>Final room →</button>";
+    $("n6").addEventListener("click",()=>go("s-7",5));
+  }else{
+    tries++;bump(-150,"-150 aura");
+    r.className="react is-live is-bad";
+    r.innerHTML="<h3>That's not a word. 🫠</h3><p>Keep cranking. You'll know it when you see it.</p>";
+  }
+});
+
+/* 7 · WHAT NOW → 1 */
+let stepN=1;
+$("steps").addEventListener("click",e=>{
+  const b=e.target.closest(".step");if(!b||b.classList.contains("is-set"))return;
+  if(+b.dataset.o===stepN){
+    b.classList.add("is-set");b.querySelector(".badge").textContent=stepN;
+    bump(250,"+250 aura");stepN++;
+    if(stepN===5){
+      bump(400,"+400 combo");
+      const r=$("r7");r.className="react is-live";
+      r.innerHTML="<h3>That's the play. 🫡</h3>"+digitTag(6)+
+        "<ul><li><b>Tell an adult</b> — you're not in trouble, and you shouldn't do this alone</li>"+
+        "<li><b>Change the password</b> — kicks them straight out</li>"+
+        "<li><b>Turn on 2FA</b> — stops them walking back in</li>"+
+        "<li><b>Warn your mates</b> — they're getting DMs from 'you' right now</li></ul>"+
+        "<p>Jayden did none of these for three days because he was embarrassed. <b>That one thing is your last digit.</b></p>"+
+        "<button class='chunk' id='n7'>Open the box →</button>";
+      $("n7").addEventListener("click",()=>go("s-pad",6));
+    }
+  }else{
+    b.classList.add("is-no");bump(-150,"-150 aura");
+    setTimeout(()=>b.classList.remove("is-no"),400);
+  }
+});
+
+/* KEYPAD */
+const LEN=CODE.length;
+function drawEntry(){$("entry").textContent=(entry+"_".repeat(LEN)).slice(0,LEN);}
+document.querySelectorAll(".key").forEach(k=>k.addEventListener("click",()=>{
+  const v=k.dataset.k;
+  if(v==="del")entry=entry.slice(0,-1);
+  else if(v==="ok"){
+    if(entry===CODE.join("")){
+      if(tick){clearInterval(tick);tick=null;}
+      const bonus=Math.min(1000,Math.max(0,secs*4));
+      if(bonus>0)bump(bonus,"+"+bonus.toLocaleString()+" time bonus");
+      const A=aura;$("finalAura").textContent=A.toLocaleString();
+      const r=A>=7000?["SIGMA","top 1% behaviour"]:A>=5200?["CERTIFIED W","respectable aura"]:
+              A>=3500?["MID BUT WE MOVE","you got there"]:["NPC ARC","run it back king"];
+      $("rankT").textContent=r[0];$("rankS").textContent=r[1];
+      show("s-open");$("lock").style.display="none";
+    }else{const e=$("entry");e.classList.add("is-no");
+      setTimeout(()=>{e.classList.remove("is-no");entry="";drawEntry();},450);}
+    return;
+  }
+  else if(entry.length<LEN)entry+=v;
+  drawEntry();
+}));
+
+$("go").addEventListener("click",()=>{show("s-1");runClock();keepAwake();});
+$("again").addEventListener("click",()=>location.reload());
+
+/* stop phones dimming mid round (silently ignored where unsupported) */
+let wake=null;
+async function keepAwake(){try{if("wakeLock" in navigator)wake=await navigator.wakeLock.request("screen");}catch(_){}}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"&&tick&&!wake)keepAwake();});
+
+/* facilitator: press N to skip a stuck room */
+const ORDER=["s-intro","s-1","s-2","s-3","s-4","s-5","s-6","s-7","s-pad","s-open"];
+document.addEventListener("keydown",e=>{
+  if(e.key!=="n"&&e.key!=="N")return;
+  if(document.activeElement===$("pet"))return;
+  const cur=ORDER.findIndex(id=>$(id).classList.contains("is-live"));
+  if(cur<0||cur>=ORDER.length-1)return;
+  if(cur>=1&&cur<=7&&!dialSet[cur-1])setDial(cur-1);
+  show(ORDER[cur+1]);if(cur===0)runClock();
+  if(ORDER[cur+1]==="s-open"){if(tick){clearInterval(tick);tick=null;}$("lock").style.display="none";}
+});
+
+/* phones: make sure the feedback panel is actually visible when it appears */
+const reactWatch=new MutationObserver(list=>list.forEach(m=>{
+  const el=m.target;
+  if(el.classList&&el.classList.contains("react")&&el.classList.contains("is-live"))
+    setTimeout(()=>{try{el.scrollIntoView({block:"nearest",behavior:"smooth"});}catch(_){}},150);
+}));
+document.querySelectorAll(".react").forEach(el=>reactWatch.observe(el,{attributes:true,attributeFilter:["class"]}));
+
+paint();drawEntry();redraw();
+</script>
+</body>
+</html>
